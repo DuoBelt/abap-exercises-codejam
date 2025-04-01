@@ -54,171 +54,194 @@ After completing these steps you will have created another class which selects d
 You've now created two classes showing how to output results to the console.
 
 Continue to - [Exercise 2 - Exposing and Consuming Services via HTTP ](../ex2/README.md)
+Poniżej znajdziesz w pełni sformatowaną wersję tekstu gotową do publikacji na **GitHubie** w pliku `README.md`. Zastosowano **pogrubienia**, **emotikony**, **wypunktowania**, a także poprawne oznaczenie bloków kodu `ABAP` dla lepszej czytelności.
 
+---
 
-📘 Ćwiczenia ABAP RAP – Wprowadzenie i Struktura
-Ćwiczenia w ramach nauki ABAP RESTful Application Programming Model (RAP) to praktyczny cykl zadań programistycznych, dzięki którym nauczysz się krok po kroku tworzyć nowoczesne aplikacje biznesowe w środowisku SAP BTP.
+# 📘 Ćwiczenia ABAP RAP – Wprowadzenie i Struktura
 
-🧭 Czym są ćwiczenia ABAP RAP?
-W materiałach edukacyjnych ABAP RAP, pojęcie "ćwiczenia" odnosi się do praktycznych zadań, które polegają na tworzeniu i integrowaniu różnych artefaktów programistycznych w systemie ABAP. Celem tych ćwiczeń jest budowa aplikacji biznesowej udostępnianej w formie usług OData (np. dla SAP Fiori), z wykorzystaniem pełnych możliwości chmurowego środowiska ABAP.
+Ćwiczenia w ramach nauki **ABAP RESTful Application Programming Model (RAP)** to **praktyczny cykl zadań programistycznych**, dzięki którym nauczysz się krok po kroku tworzyć nowoczesne aplikacje biznesowe w środowisku **SAP BTP**.
+
+---
+
+## 🧭 Czym są ćwiczenia ABAP RAP?
+
+W materiałach edukacyjnych ABAP RAP, pojęcie **"ćwiczenia"** odnosi się do praktycznych zadań, które polegają na **tworzeniu i integrowaniu różnych artefaktów programistycznych w systemie ABAP**.
+
+**Celem tych ćwiczeń** jest budowa aplikacji biznesowej udostępnianej w formie usług **OData** (np. dla SAP Fiori), z wykorzystaniem pełnych możliwości chmurowego środowiska ABAP.
 
 W toku realizacji zadań poznajesz m.in. techniki:
 
-modelowania danych (CDS),
+- **modelowania danych (CDS)**  
+- **definiowania logiki biznesowej (Behavior Definition)**  
+- **udostępniania usług (Service Definition & Binding)**  
+- **dostrajania interfejsu użytkownika (UI Annotations)**
 
-definiowania logiki biznesowej (Behavior Definition),
+---
 
-udostępniania usług (Service Definition & Binding),
+## 🧩 Struktura ćwiczeń krok po kroku
 
-oraz dostrajania interfejsu użytkownika (UI Annotations).
+### 1. 🎯 Tworzenie modelu danych (CDS Views)
 
-🧩 Struktura ćwiczeń krok po kroku
-1. 🎯 Tworzenie modelu danych (CDS Views)
-Pierwsze ćwiczenia koncentrują się na modelowaniu danych aplikacji:
+Pierwsze ćwiczenia koncentrują się na **modelowaniu danych aplikacji**.
 
-Uczysz się tworzyć Core Data Services (CDS) – podstawowe (I_*), projekcyjne (C_*) i pomocnicze widoki.
+**Uczysz się tworzyć** `Core Data Services (CDS)` – podstawowe (`I_*`), projekcyjne (`C_*`) i pomocnicze widoki.
 
-Przykładowe widoki:
+**Przykładowe widoki:**
 
-/DMO/I_Connection_R
+- `/DMO/I_Connection_R`
+- `/DMO/C_TRAVEL_PROCESSOR_M`
+- `I_CountryVH`, `I_Airport_StdVH`
 
-/DMO/C_TRAVEL_PROCESSOR_M
+**Poznajesz:**
 
-I_CountryVH, I_Airport_StdVH
+- aliasy (`AS`)  
+- adnotacje semantyczne `@Semantics.amount.currencyCode`  
+- asocjacje (`association to ...`)  
+- użycie `@ObjectModel`
 
-Poznajesz:
+---
 
-aliasy (AS),
+### 2. 🧠 Definiowanie zachowania (Behavior Definition & Implementation)
 
-adnotacje semantyczne @Semantics.amount.currencyCode,
-
-asocjacje (association to ...),
-
-użycie @ObjectModel.
-
-2. 🧠 Definiowanie zachowania (Behavior Definition & Implementation)
 Kolejne ćwiczenia prowadzą przez:
 
-Tworzenie definicji zachowań (behavior definition) i ich implementacji (behavior implementation).
+- tworzenie definicji zachowań (`behavior definition`)
+- implementację logiki (`behavior implementation`)
 
-Przykładowe elementy:
+**Przykładowe elementy:**
 
-abap
-Kopiuj
-Edytuj
+```abap
 use action set_status_booked;
 use association _BOOKING { create; };
 validation check_required_fields on save;
-Uczysz się jak:
+```
 
-aktywować akcje biznesowe,
+**Uczysz się:**
 
-zarządzać spójnością danych,
+- aktywować akcje biznesowe  
+- zarządzać spójnością danych  
+- tworzyć reguły walidacyjne  
+- definiować efekty uboczne (`side effects`)
 
-tworzyć reguły walidacyjne,
+---
 
-definiować efekty uboczne (side effects).
+### 3. 🌐 Tworzenie i publikacja usług (Service Definition & Service Binding)
 
-3. 🌐 Tworzenie i publikacja usług (Service Definition & Service Binding)
 Tworzysz:
 
-Service Definition – określa, co będzie udostępnione:
+- **Service Definition** – określa, co będzie udostępnione:
 
-abap
-Kopiuj
-Edytuj
+```abap
 define service Z_TRAVEL_SRV {
   expose /DMO/I_TRAVEL as Travel;
   expose /DMO/I_BOOKING as Booking;
 }
-Service Binding – określa, w jaki sposób usługa ma być udostępniona (np. OData V4).
+```
 
-Aktywacja bindowania umożliwia natychmiastowe testowanie aplikacji w przeglądarce Fiori Elements.
+- **Service Binding** – określa, w jaki sposób usługa ma być udostępniona (np. OData V4)
 
-4. 🔍 Projekcje i dostrajanie logiki aplikacji (Projections)
-Projekcje CDS służą do dostosowywania danych do konkretnych przypadków użycia.
+**Aktywacja bindowania** umożliwia natychmiastowe testowanie aplikacji w przeglądarce **Fiori Elements**.
 
-Używane do:
+---
 
-filtracji pól,
+### 4. 🔍 Projekcje i dostrajanie logiki aplikacji (Projections)
 
-przypisywania adnotacji @UI,
+Projekcje CDS służą do **dostosowywania danych** do konkretnych przypadków użycia.
 
-przekierowań kompozycji:
+**Używane do:**
 
-abap
-Kopiuj
-Edytuj
+- filtracji pól  
+- przypisywania adnotacji `@UI`  
+- przekierowań kompozycji:
+
+```abap
 redirected to composition child _BOOKING;
-Przykładowe projekcje:
+```
 
-/DMO/C_BOOKING_PROCESSOR_M
+**Przykładowe projekcje:**
 
-/DMO/C_TRAVEL_APPROVER_M
+- `/DMO/C_BOOKING_PROCESSOR_M`  
+- `/DMO/C_TRAVEL_APPROVER_M`
 
-5. 🖼️ Adnotacje interfejsu (UI Annotations)
-W ćwiczeniach uczysz się używać adnotacji @UI do określania wyglądu aplikacji Fiori:
+---
 
-Etykiety i pozycjonowanie:
+### 5. 🖼️ Adnotacje interfejsu (UI Annotations)
 
-abap
-Kopiuj
-Edytuj
+W ćwiczeniach uczysz się używać adnotacji `@UI` do określania wyglądu aplikacji Fiori:
+
+**Etykiety i pozycjonowanie:**
+
+```abap
 @UI.lineItem: [{ position: 10 }]
-Wsparcie wyszukiwania:
+```
 
-abap
-Kopiuj
-Edytuj
+**Wsparcie wyszukiwania:**
+
+```abap
 @Search.defaultSearchElement: true
 @Search.searchable: true
-6. ✈️ Scenariusze biznesowe (Business Scenarios)
-Ćwiczenia oparte są na praktycznych modelach, np.:
+```
 
-Travel Scenario – zarządzanie podróżami,
+---
 
-Flight Reference Model – zarządzanie rezerwacjami lotów.
+### 6. ✈️ Scenariusze biznesowe (Business Scenarios)
 
-Poznajesz typowe procesy biznesowe i sposób ich odwzorowania w modelu RAP.
+Ćwiczenia oparte są na **praktycznych modelach**, np.:
 
-7. 🧪 Testowanie (Testing)
-Wybrane ćwiczenia uczą tworzenia testów jednostkowych w ABAP:
+- **Travel Scenario** – zarządzanie podróżami  
+- **Flight Reference Model** – zarządzanie rezerwacjami lotów  
 
-Klasy testowe:
+**Poznajesz typowe procesy biznesowe** i sposób ich odwzorowania w modelu RAP.
 
-abap
-Kopiuj
-Edytuj
+---
+
+### 7. 🧪 Testowanie (Testing)
+
+Wybrane ćwiczenia uczą tworzenia **testów jednostkowych w ABAP**.
+
+**Klasy testowe:**
+
+```abap
 CLASS ztest_travel DEFINITION FINAL FOR TESTING.
-Poznasz narzędzia testowe takie jak RAP BO Test Double Framework.
+```
 
-8. 🧱 Rozszerzalność (Extensibility)
+**Poznasz narzędzia:**
+
+- RAP BO Test Double Framework  
+- testowanie logiki `Behavior Implementation`  
+- testowanie usług OData
+
+---
+
+### 8. 🧱 Rozszerzalność (Extensibility)
+
 W niektórych ćwiczeniach nauczysz się:
 
-jak rozszerzyć istniejący model danych lub zachowania,
+- jak **rozszerzyć istniejący model danych lub zachowania**  
+- jak **dodać pola niestandardowe (custom fields)**  
+- jak **zachować zgodność z modelem extensibility SAP**
 
-jak dodać pola niestandardowe (custom fields),
+---
 
-jak zachować zgodność z modelem extensibility SAP.
+### 9. 🔗 Konsumpcja usług (Service Consumption)
 
-9. 🔗 Konsumpcja usług (Service Consumption)
 Ćwiczenia mogą obejmować również:
 
-tworzenie klientów OData,
+- tworzenie **klientów OData**  
+- testowanie usług **REST z poziomu ABAP**  
+- komunikację z **zewnętrznymi interfejsami API**
 
-testowanie usług REST z poziomu ABAP,
+---
 
-komunikację z zewnętrznymi interfejsami API.
+## ✅ Podsumowanie
 
-✅ Podsumowanie
-Każde ćwiczenie to krok na drodze do opanowania nowoczesnego podejścia do programowania aplikacji biznesowych z wykorzystaniem ABAP RAP.
+Każde ćwiczenie to krok na drodze do opanowania nowoczesnego podejścia do programowania aplikacji biznesowych z wykorzystaniem **ABAP RAP**.
 
 W toku nauki:
 
-modelujesz dane przy użyciu CDS,
+- **modelujesz dane** przy użyciu **CDS**  
+- **definiujesz logikę aplikacyjną** z pomocą **Behavior Definition Language (BDL)**  
+- **udostępniasz aplikacje jako usługi OData**  
+- **tworzysz kompletne, rozszerzalne aplikacje Fiori** w modelu **Cloud Ready**
 
-definiujesz logikę aplikacyjną z pomocą Behavior Definition Language (BDL),
-
-udostępniasz aplikacje jako usługi OData,
-
-tworzysz kompletne, rozszerzalne aplikacje Fiori w modelu Cloud Ready.
