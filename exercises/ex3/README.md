@@ -236,3 +236,154 @@ ENDCLASS.
 
 You've now created your a Service Consumption Model for consuming an external service.
 
+Poniżej znajdziesz **kompletny i sformatowany opis ćwiczenia „Exercise 3 – Service Consumption Model”**, gotowy do publikacji na GitHubie (`README.md`). Zawiera on instrukcję krok po kroku, słowniczek pojęć oraz **20 przykładów zastosowania SCM w praktyce biznesowej**:
+
+---
+
+# 🔗 Exercise 3 – Service Consumption Model (SCM)
+
+> To ćwiczenie nauczy Cię, jak integrować Twoją aplikację ABAP z usługami zewnętrznymi przy użyciu **Service Consumption Model (SCM)** w ABAP RESTful Application Programming Model.
+
+---
+
+## 🎯 Cel ćwiczenia
+
+- Tworzenie definicji **SCM** dla serwisów OData.
+- Konsumpcja zewnętrznych usług (np. z SAP API Hub) z poziomu kodu ABAP.
+- Poznanie sposobu komunikacji aplikacji ABAP z ekosystemem zewnętrznych serwisów.
+
+---
+
+## 🧭 Krok po kroku – SCM dla usługi "Bank – Read API"
+
+### 1. 🔍 Znalezienie serwisu
+
+1. Przejdź do: [SAP API Hub – Bank Details API](https://api.sap.com/api/API_BANKDETAIL_SRV/resource)  
+2. Zaloguj się / zarejestruj.  
+3. Zapoznaj się z dokumentacją i kliknij `Show API Key`. Skopiuj klucz API.
+
+---
+
+### 2. 💾 Pobranie pliku EDMX
+
+1. W zakładce **API Specification** znajdź link do pliku EDMX.  
+2. Pobierz go – posłuży jako źródło metadanych.
+
+---
+
+### 3. 🧱 Utworzenie definicji Service Consumption Model
+
+1. W **ABAP Development Tools (ADT)**:  
+   `New → Other ABAP Repository Object → Service Consumption Model`.  
+2. Wybierz typ: **OData V2 Remote Consumption**.  
+3. Podaj nazwę, opis i wskaż wcześniej pobrany plik EDMX.  
+4. Zatwierdź i aktywuj.
+
+---
+
+### 4. 🔎 Przegląd wygenerowanych artefaktów
+
+- Wygenerowane klasy:  
+  - Klasa proxy klienta  
+  - Interfejs komunikacyjny  
+  - Definicja encji i typów danych  
+
+Możesz je teraz wykorzystać w kodzie ABAP.
+
+---
+
+### 5. 💡 Implementacja konsumpcji serwisu
+
+1. W klasie ABAP (np. `ZCL_SCM_BANKDETAILS`) zaimplementuj metodę:
+
+```abap
+METHOD get_bank_details RETURNING VALUE(rt_json) TYPE string.
+
+  DATA(lo_client_proxy) = NEW zcl_bankdetail_scm_client( ).
+  lo_client_proxy->set_api_key( '<TWÓJ_KLUCZ_API>' ).
+
+  DATA(lo_request) = lo_client_proxy->bankdetailset( )->create_query( )->top( 25 ).
+  DATA(lo_response) = lo_request->execute( ).
+
+  rt_json = lo_response->get_raw_result( ).
+
+ENDMETHOD.
+```
+
+2. Możesz również filtrować dane:
+
+```abap
+lo_request->filter( |BankCountry eq 'DE'| ).
+```
+
+---
+
+### 6. 🧪 Testowanie
+
+- Wywołaj metodę z klasy pomocniczej lub `ABAP Unit`.  
+- Sprawdź, czy odpowiedź JSON zawiera dane bankowe.
+
+---
+
+## 📚 Słowniczek pojęć i fraz
+
+| Pojęcie | Znaczenie |
+|--------|-----------|
+| **SCM (Service Consumption Model)** | Narzędzie do konsumpcji zewnętrznych usług w ABAP |
+| **OData Service** | Protokół REST do udostępniania danych |
+| **SAP API Hub** | Katalog publicznych interfejsów API SAP |
+| **EDMX File** | Plik XML opisujący metadane usługi OData |
+| **Proxy Class** | Wygenerowana klasa pośrednicząca między ABAP a API |
+| **CRUD** | Operacje: Create, Read, Update, Delete |
+| **Client Proxy** | Klasa obsługująca komunikację z API (np. `/iwbep/if_cp_client_proxy`) |
+| **Filter Factory** | Narzędzie do tworzenia zapytań z filtrami |
+| **Entity Set** | Kolekcja danych udostępniona przez OData |
+| **Communication Arrangement** | Konfiguracja połączenia z zewnętrznym API |
+| **JSON** | Format danych odpowiedzi API |
+| **API Key** | Klucz uwierzytelniający do API |
+| **HTTP Client** | Klasa do wykonywania żądań HTTP |
+| **Remote Consumption** | Tryb dostępu do zewnętrznych serwisów |
+| **$top, $filter** | Parametry OData do paginacji i filtrowania |
+| **Authentication** | Mechanizm uwierzytelniania w API |
+| **REST** | Architektura komunikacji w sieci |
+| **Callback** | Zwrotna obsługa wyników |
+| **GET Request** | Żądanie odczytu danych |
+| **Zdalna integracja** | Komunikacja ABAP z serwisem poza systemem SAP |
+
+---
+
+## 💼 20 zastosowań SCM w środowisku biznesowym
+
+1. Pobieranie aktualnych kursów walut z Europejskiego Banku Centralnego  
+2. Sprawdzanie statusów przesyłek kurierskich z API firm transportowych  
+3. Integracja z krajowym rejestrem VAT (np. VIES)  
+4. Pobieranie danych bankowych z API SAP  
+5. Synchronizacja danych kontaktowych z Microsoft Graph API  
+6. Łączenie z systemami CRM spoza SAP (np. HubSpot, Salesforce)  
+7. Integracja z platformami e-commerce (np. Shopify, Magento)  
+8. Odczyt statusów zamówień z systemów zewnętrznych  
+9. Aktualizacja danych logistycznych z dostawców 3PL  
+10. Pobieranie dokumentów PDF z chmury (np. Google Drive API)  
+11. Automatyczne pobieranie notowań giełdowych  
+12. Synchronizacja danych HR z zewnętrznym systemem kadrowym  
+13. Pobieranie danych pogodowych do planowania logistyki  
+14. Integracja z API płatności (np. Stripe, PayPal)  
+15. Import danych geolokalizacyjnych i map  
+16. Połączenie z bazą danych przepisów prawnych lub fiskalnych  
+17. Wysyłka danych ABAP do Power BI lub Tableau  
+18. Obsługa zgłoszeń klientów z zewnętrznych systemów ticketowych  
+19. Konsumpcja API fakturowania elektronicznego (np. KSeF, PEPPOL)  
+20. Użycie publicznych interfejsów REST do analizy rynkowej
+
+---
+
+## ✅ Podsumowanie
+
+> Dzięki Service Consumption Model możesz budować aplikacje ABAP, które integrują się w czasie rzeczywistym z **zewnętrznymi serwisami** – bez ręcznego tworzenia zapytań HTTP.
+
+To nie tylko nowoczesna metoda integracji, ale też ogromna oszczędność czasu i zgodność z architekturą SAP Cloud.
+
+---
+
+
+
