@@ -131,6 +131,203 @@ After completing these steps you will have consumed an external API from the SAP
 
 ## Summary
 
+Poniżej znajdziesz **sformatowaną instrukcję krok po kroku** do ćwiczenia **„Ćwiczenie 2 – Uwidacznianie i Konsumowanie Usług przez HTTP”**, gotową do publikacji w pliku `README.md` repozytorium GitHub. Zastosowano nagłówki, listy, pogrubienia, bloki kodu `ABAP`, objaśnienia pojęć i sekcję wyzwania dla uczestników:
+
+---
+
+# 🌐 Ćwiczenie 2 – Uwidacznianie i Konsumowanie Usług przez HTTP
+
+> To ćwiczenie pokaże Ci, jak **tworzyć własne usługi HTTP w systemie ABAP** oraz jak **konsumować zewnętrzne API** z wykorzystaniem SAP API Hub.  
+
+---
+
+## 🧩 Struktura ćwiczenia
+
+Ćwiczenie składa się z dwóch części:
+
+1. **Uwidacznianie własnej usługi HTTP w ABAP**
+2. **Konsumpcja zewnętrznej usługi HTTP z SAP API Hub**
+
+---
+
+## 📘 Część 2.1 – Uwidacznianie Usługi HTTP w ABAP
+
+### ✅ Krok 1 – Utworzenie usługi HTTP
+
+1. Kliknij **prawym przyciskiem** na swój pakiet w ADT.  
+2. Wybierz: `New → Other ABAP Repository Object`  
+3. Wybierz: `Connectivity → HTTP Service → Next`  
+4. Nadaj nazwę usłudze, np. `ZHTTPSRV_XXX`  
+5. Kliknij `Finish` – system utworzy klasę handlera.
+
+---
+
+### ✅ Krok 2 – Implementacja klasy obsługi HTTP
+
+1. Przejdź do klasy handlera (`Handler Class`)  
+2. Znajdziesz metodę: `IF_HTTP_EXTENSION~HANDLE_REQUEST`  
+3. Dodaj poniższy kod:
+
+```abap
+METHOD if_http_extension~handle_request.
+
+  DATA: lv_timestamp TYPE timestampl.
+
+  GET TIME STAMP lv_timestamp.
+
+  DATA(lv_response) = |Timestamp: { lv_timestamp }|.
+
+  response->set_text( lv_response ).
+  response->set_status( cl_http_status=>http_ok, 'OK' ).
+  response->set_header_field( name  = 'Content-Type'
+                              value = 'text/plain' ).
+
+ENDMETHOD.
+```
+
+4. Zapisz i aktywuj klasę.
+
+---
+
+### ✅ Krok 3 – Testowanie usługi
+
+1. Wróć do obiektu `HTTP Service`  
+2. Kliknij link `URL`  
+3. W przeglądarce dodaj na końcu adresu: `&cmd=timestamp`  
+4. Naciśnij `Enter` – powinieneś zobaczyć aktualny znacznik czasu.
+
+---
+
+## 🧠 Słowniczek pojęć
+
+- **Usługa HTTP (HTTP Service):** obiekt w systemie ABAP obsługujący żądania HTTP.  
+- **Klasa obsługi HTTP (Handler Class):** klasa implementująca `IF_HTTP_EXTENSION`, zawiera metodę `HANDLE_REQUEST`.  
+- **Żądanie HTTP:** komunikat od klienta (np. przeglądarki).  
+- **Odpowiedź HTTP:** komunikat zwrotny od serwera.  
+- **Parametry URL:** dodatkowe dane przekazywane w adresie URL, np. `&cmd=timestamp`.
+
+---
+
+## 🌍 Część 2.2 – Konsumpcja zewnętrznej usługi HTTP
+
+### ✅ Krok 1 – Uzyskanie API Key z SAP API Hub
+
+1. Przejdź do: [`https://api.sap.com/api/API_BANKDETAIL_SRV/resource`](https://api.sap.com/api/API_BANKDETAIL_SRV/resource)  
+2. Zaloguj się i kliknij `Show API Key`  
+3. Skopiuj swój klucz – będzie potrzebny w ABAP
+
+---
+
+### ✅ Krok 2 – Implementacja metody `GET_BANK_DETAILS`
+
+1. Dodaj do klasy nową metodę `GET_BANK_DETAILS`:
+
+```abap
+METHOD get_bank_details RETURNING r_json TYPE string.
+
+  DATA: lv_url         TYPE string VALUE 'https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/'.
+  DATA: lo_http_client TYPE REF TO if_web_http_client.
+
+  lo_http_client = cl_web_http_client_manager=>create_by_http_destination(
+    i_destination = cl_http_destination_provider=>create_by_url( lv_url )
+  ).
+
+  DATA(lo_request) = lo_http_client->get_http_request( ).
+  lo_request->set_header_fields( VALUE #(
+    ( name = 'Content-Type' value = 'application/json' )
+    ( name = 'Accept'       value = 'application/json' )
+    ( name = 'APIKey'       value = '<TWÓJ_KLUCZ_API>' ) " <--- Wstaw swój klucz!
+  ) ).
+
+  lo_request->set_uri_path(
+    i_uri_path = lv_url && 'API_BANKDETAIL_SRV/A_BankDetail?$top=25&$format=json'
+  ).
+
+  TRY.
+    DATA(lv_response) = lo_http_client->execute( i_method = if_web_http_client=>get )->get_text( ).
+  CATCH cx_web_http_client_error.
+  ENDTRY.
+
+  r_json = lv_response.
+
+ENDMETHOD.
+```
+
+---
+
+### ✅ Krok 3 – Modyfikacja `HANDLE_REQUEST`
+
+Dodaj warunek do metody:
+
+```abap
+METHOD if_http_extension~handle_request.
+
+  IF request->get_form_field( 'cmd' ) = 'timestamp'.
+    DATA(lv_timestamp) TYPE timestampl.
+    GET TIME STAMP lv_timestamp.
+    response->set_text( |Timestamp: { lv_timestamp }| ).
+    response->set_status( cl_http_status=>http_ok, 'OK' ).
+    response->set_header_field( name = 'Content-Type' value = 'text/plain' ).
+
+  ELSEIF request->get_form_field( 'cmd' ) = 'bankdetails'.
+    DATA(lv_bank_details) = get_bank_details( ).
+    response->set_text( lv_bank_details ).
+    response->set_status( cl_http_status=>http_ok, 'OK' ).
+    response->set_header_field( name = 'Content-Type' value = 'application/json' ).
+
+  ENDIF.
+
+ENDMETHOD.
+```
+
+---
+
+### ✅ Krok 4 – Testowanie usługi zewnętrznej
+
+1. Przejdź do adresu URL Twojej usługi  
+2. Użyj parametru: `&cmd=bankdetails`  
+3. Powinieneś otrzymać dane w formacie JSON z SAP API Hub
+
+---
+
+## 🧠 Słowniczek pojęć (część 2)
+
+- **SAP API Hub:** katalog otwartych interfejsów API SAP  
+- **API Key:** identyfikator do uwierzytelniania żądań  
+- **HTTP GET:** metoda do pobierania danych  
+- **JSON:** format wymiany danych  
+- **Klasy HTTP ABAP:** klasy systemowe SAP do pracy z HTTP, m.in.:  
+  - `CL_WEB_HTTP_CLIENT_MANAGER`  
+  - `IF_WEB_HTTP_CLIENT`  
+  - `IF_HTTP_REQUEST`  
+  - `IF_HTTP_RESPONSE`
+
+---
+
+## 🎯 Wyzwanie
+
+> Na podstawie zdobytej wiedzy:
+>
+> 🔧 Dodaj nową metodę do swojej klasy `ZCL_HTTPSRV_XXX`, która konsumuje inne API z SAP API Hub (np. waluty, kraje, jednostki miary).  
+>
+> 🎯 Cel: przetestuj swój kod, dodaj kolejną wartość `cmd` w URL.
+
+---
+
+## ✅ Podsumowanie
+
+Po wykonaniu ćwiczenia potrafisz:
+
+- Tworzyć i wystawiać własne usługi HTTP w systemie ABAP  
+- Implementować klasy `Handler` obsługujące logikę dla usług  
+- Konsumować zewnętrzne API (OData/REST) z SAP API Hub  
+- Przetwarzać dane JSON w odpowiedzi  
+- Przekazywać dane przez URL i reagować na parametry
+
+--
+
+
+
 You've now created a new HTTP service that exposes functionality from ABAP as well as you have learned how to consume an external service via HTTP. 
 
 Continue to - [Exercise 3 - Service Consumption Model ](../ex3/README.md)
